@@ -1,0 +1,37 @@
+services:
+  customer-postgres:
+    image: postgres:16
+    container_name: customer-postgres
+    environment:
+      POSTGRES_DB: customerdb
+      POSTGRES_USER: customer_user
+      POSTGRES_PASSWORD: customer_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - customer_postgres_data:/var/lib/postgresql/data
+    networks:
+      - fintech-network
+
+  customer-service:
+    build:
+      context: ./services/customer-service
+      dockerfile: Dockerfile
+    container_name: customer-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://customer-postgres:5432/customerdb
+      SPRING_DATASOURCE_USERNAME: customer_user
+      SPRING_DATASOURCE_PASSWORD: customer_pass
+    ports:
+      - "8081:8081"
+    depends_on:
+      - customer-postgres
+    networks:
+      - fintech-network
+
+volumes:
+  customer_postgres_data:
+
+networks:
+  fintech-network:
+    driver: bridge
