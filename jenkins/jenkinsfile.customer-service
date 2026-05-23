@@ -62,6 +62,12 @@ pipeline {
                 sh "docker images | grep ${IMAGE_NAME}"
             }
         }
+
+        stage('Trivy Image Scan') {
+            steps {
+                sh "trivy image --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG_VALUE}"
+            }
+        }
     }
 
     post {
