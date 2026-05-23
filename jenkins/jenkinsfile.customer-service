@@ -42,9 +42,9 @@ pipeline {
                         returnStdout: true
                     ).trim()
 
-                    env.IMAGE_TAG = "${env.BUILD_NUMBER}-${gitCommitShort}"
+                    env.IMAGE_TAG = env.BUILD_NUMBER + "-" + gitCommitShort
 
-                  echo "Generated Image Tag: ${env.IMAGE_TAG}"
+                    echo "Generated Image Tag: ${env.IMAGE_TAG}"
                 }
             }
         }
