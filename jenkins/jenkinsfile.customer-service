@@ -6,6 +6,7 @@ pipeline {
     }
 
     environment {
+        DOCKER_BUILDKIT = '0'
         DOCKERHUB_REPO = 'nsonar/customer-service'
         SERVICE_NAME = 'customer-service'
         SERVICE_DIR = 'services/customer-service'
