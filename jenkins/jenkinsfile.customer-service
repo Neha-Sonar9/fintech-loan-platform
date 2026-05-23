@@ -34,15 +34,21 @@ pipeline {
             }
         }
 
+        stage('Verify Git Commit') {
+            steps {
+               sh 'git log -1 --oneline'
+               sh 'git rev-parse --short HEAD'
+               sh "echo 'Jenkins Build Number: ${BUILD_NUMBER}'"
+            }
+        }
+
         stage('Generate Image Tag') {
             steps {
                 script {
-                    def gitCommitShort = sh(
-                        script: 'git rev-parse --short HEAD',
-                        returnStdout: true
+                    env.IMAGE_TAG = sh(
+                       script: 'echo "${BUILD_NUMBER}-$(git rev-parse --short HEAD)"',
+                       returnStdout: true
                     ).trim()
-
-                    env.IMAGE_TAG = env.BUILD_NUMBER + "-" + gitCommitShort
 
                     echo "Generated Image Tag: ${env.IMAGE_TAG}"
                 }
