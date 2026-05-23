@@ -1,3 +1,5 @@
+def IMAGE_TAG_VALUE = ''
+
 pipeline {
     agent {
         label 'docker-agent'
@@ -7,11 +9,9 @@ pipeline {
         SERVICE_NAME = 'customer-service'
         SERVICE_DIR = 'services/customer-service'
         IMAGE_NAME = 'customer-service'
-        IMAGE_TAG = ''
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -37,14 +37,12 @@ pipeline {
         stage('Generate Image Tag') {
             steps {
                 script {
-                    def gitCommitShort = sh(
-                        script: 'git rev-parse --short HEAD',
+                    IMAGE_TAG_VALUE = sh(
+                        script: 'echo "${BUILD_NUMBER}-$(git rev-parse --short HEAD)"',
                         returnStdout: true
                     ).trim()
 
-                    env.IMAGE_TAG = "${env.BUILD_NUMBER}-${gitCommitShort}"
-
-                  echo "Generated Image Tag: ${env.IMAGE_TAG}"
+                    echo "Generated Image Tag: ${IMAGE_TAG_VALUE}"
                 }
             }
         }
@@ -52,29 +50,34 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir("${SERVICE_DIR}") {
-                    sh "docker build -t ${IMAGE_NAME}:${env.IMAGE_TAG} ."
+                    script {
+                        sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG_VALUE} ."
+                    }
                 }
             }
         }
 
         stage('Verify Docker Image') {
             steps {
-                sh "docker images | grep ${IMAGE_NAME}"
+                script {
+                    sh "docker images | grep ${IMAGE_TAG_VALUE}"
+                }
             }
         }
 
         stage('Trivy Image Scan') {
             steps {
-                sh "trivy image --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG_VALUE}"
+                script {
+                    sh "trivy image --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG_VALUE}"
+                }
             }
         }
     }
 
     post {
         success {
-            echo "CI pipeline completed successfully for ${SERVICE_NAME}"
+            echo "CI pipeline completed successfully for ${SERVICE_NAME}. Image tag: ${IMAGE_TAG_VALUE}"
         }
-
         failure {
             echo "CI pipeline failed for ${SERVICE_NAME}"
         }
