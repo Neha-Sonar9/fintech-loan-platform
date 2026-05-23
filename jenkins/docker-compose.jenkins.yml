@@ -12,7 +12,9 @@ services:
       - jenkins-network
 
   jenkins-agent:
-    image: jenkins/inbound-agent:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
     container_name: jenkins-agent
     user: root
     environment:
