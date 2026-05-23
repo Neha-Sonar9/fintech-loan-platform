@@ -6,6 +6,7 @@ pipeline {
     }
 
     environment {
+        DOCKERHUB_REPO = 'nsonar/customer-service'
         SERVICE_NAME = 'customer-service'
         SERVICE_DIR = 'services/customer-service'
         IMAGE_NAME = 'customer-service'
@@ -69,6 +70,31 @@ pipeline {
             steps {
                 script {
                     sh "trivy image --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG_VALUE}"
+                }
+            }
+        }
+    
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKERHUB_USERNAME',
+                        passwordVariable: 'DOCKERHUB_PASSWORD'
+                    )]) {
+
+                        sh '''
+                           echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+                        '''
+
+                        sh """
+                           docker tag ${IMAGE_NAME}:${IMAGE_TAG_VALUE} ${DOCKERHUB_REPO}:${IMAGE_TAG_VALUE}
+                        """
+                        
+                        sh """
+                           docker push ${DOCKERHUB_REPO}:${IMAGE_TAG_VALUE}
+                        """
+                    }
                 }
             }
         }
