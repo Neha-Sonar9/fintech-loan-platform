@@ -70,7 +70,13 @@ pipeline {
         stage('Trivy Image Scan') {
             steps {
                 script {
-                    sh "trivy image --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG_VALUE}"
+                    sh """
+                    trivy image \
+                    --scanners vuln \
+                    --timeout 15m \
+                    --severity HIGH,CRITICAL \
+                    ${IMAGE_NAME}:${IMAGE_TAG_VALUE}
+                    """
                 }
             }
         }
