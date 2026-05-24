@@ -28,6 +28,16 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    withSonarQubeEnv('SonarQube') {
+                        sh './mvnw sonar:sonar -Dsonar.projectKey=customer-service -Dsonar.projectName=customer-service'
+                    }
+                }
+            }
+        }
+
         stage('Build JAR') {
             steps {
                 dir("${SERVICE_DIR}") {
