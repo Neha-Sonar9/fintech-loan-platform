@@ -31,7 +31,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 dir("${SERVICE_DIR}") {
-                    withSonarQubeEnv('SonarQube') {
+                    withSonarQubeEnv('sonarqube') {
                         sh './mvnw sonar:sonar -Dsonar.projectKey=customer-service -Dsonar.projectName=customer-service'
                     }
                 }
