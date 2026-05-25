@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-postgres
+  namespace: fintech-dev
+spec:
+  type: ClusterIP
+  selector:
+    app: customer-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
