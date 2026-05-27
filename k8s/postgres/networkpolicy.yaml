@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-customer-service-to-postgres
+  namespace: fintech-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: customer-postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: customer-service
+      ports:
+        - protocol: TCP
+          port: 5432

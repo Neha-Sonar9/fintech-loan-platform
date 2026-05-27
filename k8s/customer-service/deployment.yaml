@@ -40,6 +40,12 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
 
+          strategy:
+            type: RollingUpdate
+            rollingUpdate:
+               maxUnavailable: 1
+               maxSurge: 1
+
           envFrom:
             - configMapRef:
                 name: customer-service-config
