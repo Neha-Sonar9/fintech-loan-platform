@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: customer-service-ingress
+  namespace: fintech-dev
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: fintech.local
+      http:
+        paths:
+          - path: /customer-service(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: customer-service
+                port:
+                  number: 8081

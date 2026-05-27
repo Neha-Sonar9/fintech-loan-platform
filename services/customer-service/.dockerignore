@@ -2,3 +2,7 @@
 .idea
 .vscode
 *.log
+.mvn/wrapper/maven-wrapper.jar
+target/*.original
+target/surefire-reports
+target/test-classes
