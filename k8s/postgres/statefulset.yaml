@@ -1,9 +1,10 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: customer-postgres
   namespace: fintech-dev
 spec:
+  serviceName: customer-postgres
   replicas: 1
   selector:
     matchLabels:
@@ -31,7 +32,28 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
-      volumes:
-        - name: postgres-data
-          persistentVolumeClaim:
-            claimName: customer-postgres-pvc
+          readinessProbe:
+            exec:
+              command:
+                 - sh
+                 - -c
+                 - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

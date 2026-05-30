@@ -11,6 +11,9 @@ pipeline {
         SERVICE_NAME = 'customer-service'
         SERVICE_DIR = 'services/customer-service'
         IMAGE_NAME = 'customer-service'
+        K8S_NAMESPACE = 'fintech-dev'
+        K8S_DEPLOYMENT = 'customer-service'
+        K8S_CONTAINER = 'customer-service'
     }
 
     stages {
