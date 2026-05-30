@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-alert-rules
+  namespace: monitoring
+data:
+  alert-rules.yml: |
+    groups:
+      - name: fintech-platform-alerts
+        rules:
+          - alert: CustomerServiceDown
+            expr: up{job="customer-service"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Customer service is down"
+              description: "Prometheus cannot scrape customer-service for more than 1 minute."
+
+          - alert: HighCustomerServiceCPU
+            expr: process_cpu_usage{job="customer-service"} > 0.70
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High CPU usage on customer-service"
+              description: "Customer-service CPU usage is above 70% for more than 2 minutes."
+
+          - alert: HighHttp5xxErrors
+            expr: rate(http_server_requests_seconds_count{job="customer-service", status=~"5.."}[2m]) > 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "HTTP 5xx errors detected"
+              description: "Customer-service is returning server errors."
+
+          - alert: HighRequestLatency
+            expr: rate(http_server_requests_seconds_sum{job="customer-service"}[2m]) / rate(http_server_requests_seconds_count{job="customer-service"}[2m]) > 1
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High API latency"
+              description: "Average request latency is above 1 second."
+
+          - alert: PostgreSQLDown
+            expr: up{job="postgres"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "PostgreSQL is down"
+              description: "PostgreSQL target is not reachable."

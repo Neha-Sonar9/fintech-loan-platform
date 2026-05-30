@@ -10,6 +10,12 @@ spec:
   selector:
     matchLabels:
       app: customer-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+    
   template:
     metadata:
       labels:
@@ -17,7 +23,7 @@ spec:
     spec:
       containers:
         - name: customer-service
-          image: nsonar/customer-service:32-8b54fd1
+          image: customer-service:observability-v2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081
@@ -38,7 +44,7 @@ spec:
             initialDelaySeconds: 40
             periodSeconds: 20
             timeoutSeconds: 3
-            failureThreshold: 3
+            failureThreshold: 3 
 
           envFrom:
             - configMapRef:
