@@ -25,6 +25,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - jenkins_agent_home:/home/jenkins/agent
+      - /Users/nehasonar/workspace/devops/fintech-loan-platform/jenkins/kubeconfig/config:/root/.kube/config:ro
+      - /Users/nehasonar/.minikube:/Users/nehasonar/.minikube:ro
     networks:
       - jenkins-network
     depends_on:
