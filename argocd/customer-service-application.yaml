@@ -8,7 +8,7 @@ spec:
 
   source:
     repoURL: https://github.com/Neha-Sonar9/fintech-loan-platform.git
-    targetRevision: feature/argocd-gitops
+    targetRevision: develop
     path: helm/customer-service
     helm:
       valueFiles:
