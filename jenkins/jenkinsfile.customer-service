@@ -92,16 +92,16 @@ pipeline {
             steps {
                 script {
                     sh """
-                    trivy image \
-                    --scanners vuln \
-                    --timeout 15m \
-                    --severity HIGH,CRITICAL \
-                    ${IMAGE_NAME}:${IMAGE_TAG_VALUE}
+                        trivy image \
+                        --scanners vuln \
+                        --timeout 15m \
+                        --severity HIGH,CRITICAL \
+                        ${IMAGE_NAME}:${IMAGE_TAG_VALUE}
                     """
                 }
             }
         }
-    
+
         stage('Push Docker Image') {
             steps {
                 script {
@@ -110,19 +110,53 @@ pipeline {
                         usernameVariable: 'DOCKERHUB_USERNAME',
                         passwordVariable: 'DOCKERHUB_PASSWORD'
                     )]) {
-
                         sh '''
-                           echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+                            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
                         '''
 
                         sh """
-                           docker tag ${IMAGE_NAME}:${IMAGE_TAG_VALUE} ${DOCKERHUB_REPO}:${IMAGE_TAG_VALUE}
+                            docker tag ${IMAGE_NAME}:${IMAGE_TAG_VALUE} ${DOCKERHUB_REPO}:${IMAGE_TAG_VALUE}
                         """
-                        
+
                         sh """
-                           docker push ${DOCKERHUB_REPO}:${IMAGE_TAG_VALUE}
+                            docker push ${DOCKERHUB_REPO}:${IMAGE_TAG_VALUE}
                         """
                     }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes with Helm') {
+            steps {
+                script {
+                    sh """
+                        helm upgrade --install ${SERVICE_NAME} helm/customer-service \
+                        --namespace ${K8S_NAMESPACE} \
+                        --set image.repository=${DOCKERHUB_REPO} \
+                        --set image.tag=${IMAGE_TAG_VALUE}
+                    """
+                }
+            }
+        }
+
+        stage('Verify Kubernetes Rollout') {
+            steps {
+                script {
+                    sh """
+                        kubectl rollout status deployment/${SERVICE_NAME} \
+                        -n ${K8S_NAMESPACE} \
+                        --timeout=180s
+                    """
+
+                    sh """
+                        kubectl get pods -n ${K8S_NAMESPACE} \
+                        -l app=${SERVICE_NAME}
+                    """
+
+                    sh """
+                        helm status ${SERVICE_NAME} \
+                        -n ${K8S_NAMESPACE}
+                    """
                 }
             }
         }
@@ -132,6 +166,7 @@ pipeline {
         success {
             echo "CI pipeline completed successfully for ${SERVICE_NAME}. Image tag: ${IMAGE_TAG_VALUE}"
         }
+
         failure {
             echo "CI pipeline failed for ${SERVICE_NAME}"
         }
