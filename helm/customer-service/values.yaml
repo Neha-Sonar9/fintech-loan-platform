@@ -1,8 +1,8 @@
 replicaCount: 3
 
 image:
-  repository: customer-service
-  tag: observability-v2
+  repository: nsonar/customer-service
+  tag: 36-84f99db
   pullPolicy: IfNotPresent
 
 service:
