@@ -2,7 +2,7 @@ replicaCount: 3
 
 image:
   repository: nsonar/customer-service
-  tag: 39-c7ce052
+  tag: 40-3616086
   pullPolicy: IfNotPresent
 
 service:
