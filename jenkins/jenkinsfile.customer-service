@@ -148,7 +148,7 @@ pipeline {
                     git add helm/customer-service/values.yaml
                     git commit -m "chore: update customer-service image tag to ${IMAGE_TAG_VALUE}" || echo "No changes to commit"
 
-                    git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/Neha-Sonar9/fintech-loan-platform.git HEAD:feature/argocd-gitops
+                    git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/Neha-Sonar9/fintech-loan-platform.git HEAD:develop
                 """
             }
         }
