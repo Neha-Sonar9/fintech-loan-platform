@@ -14,6 +14,10 @@ pipeline {
         K8S_NAMESPACE = 'fintech-dev'
         K8S_DEPLOYMENT = 'customer-service'
         K8S_CONTAINER = 'customer-service'
+        GIT_AUTHOR_NAME = 'jenkins-ci'
+        GIT_AUTHOR_EMAIL = 'jenkins-ci@example.com'
+        GIT_COMMITTER_NAME = 'jenkins-ci'
+        GIT_COMMITTER_EMAIL = 'jenkins-ci@example.com'
     }
 
     stages {
@@ -126,40 +130,30 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes with Helm') {
+        stage('Update Helm Image Tag in Git') {
             steps {
                 script {
-                    sh """
-                        helm upgrade --install ${SERVICE_NAME} helm/customer-service \
-                        --namespace ${K8S_NAMESPACE} \
-                        --set image.repository=${DOCKERHUB_REPO} \
-                        --set image.tag=${IMAGE_TAG_VALUE}
-                    """
-                }
+                   withCredentials([usernamePassword(
+                      credentialsId: 'github-push-credentials',
+                      usernameVariable: 'GIT_USERNAME',
+                      passwordVariable: 'GIT_TOKEN'
+            )]) {
+                sh """
+                    git config user.name "${GIT_AUTHOR_NAME}"
+                    git config user.email "${GIT_AUTHOR_EMAIL}"
+
+                    sed -i 's/tag: .*/tag: ${IMAGE_TAG_VALUE}/' helm/customer-service/values.yaml
+
+                    git status
+                    git add helm/customer-service/values.yaml
+                    git commit -m "chore: update customer-service image tag to ${IMAGE_TAG_VALUE}" || echo "No changes to commit"
+
+                    git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/Neha-Sonar9/fintech-loan-platform.git HEAD:develop
+                """
             }
         }
-
-        stage('Verify Kubernetes Rollout') {
-            steps {
-                script {
-                    sh """
-                        kubectl rollout status deployment/${SERVICE_NAME} \
-                        -n ${K8S_NAMESPACE} \
-                        --timeout=180s
-                    """
-
-                    sh """
-                        kubectl get pods -n ${K8S_NAMESPACE} \
-                        -l app=${SERVICE_NAME}
-                    """
-
-                    sh """
-                        helm status ${SERVICE_NAME} \
-                        -n ${K8S_NAMESPACE}
-                    """
-                }
-            }
-        }
+    }
+}
     }
 
     post {
