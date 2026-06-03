@@ -527,5 +527,7 @@ The objective is to simulate how modern cloud-native applications are delivered 
 DevOps Engineer | Kubernetes | AWS | Jenkins | Helm | GitOps | Observability
 
 ## connect
+```text
 https://github.com/Neha-Sonar9
 https://www.linkedin.com/in/neha-sonar-09j01/
+```
